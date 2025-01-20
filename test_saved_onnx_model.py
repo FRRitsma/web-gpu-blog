@@ -5,10 +5,17 @@ from pathlib import Path
 import onnxruntime as ort
 from PIL import Image
 import numpy as np
-from convert_model_to_onnx import onnx_file_path
-from hello import RESNET_LABELS_JSON
+from save_resnet_as_onnx import onnx_file_path
+from settings import RESNET_LABELS_JSON
 
+# Start inference session:
 session = ort.InferenceSession(onnx_file_path)
+
+# Load Class Labels:
+with open(RESNET_LABELS_JSON, "r") as fs:
+    imagenet_classes = json.load(fs)
+
+# Load image:
 image_path: Path = Path(__file__).parent / "test-image-3.jpg"
 image: Image = Image.open(image_path).convert("RGB")
 
@@ -26,24 +33,14 @@ def pre_process_image(image: Image) -> np.float32:
     return image_array
 
 
-image_array = pre_process_image(image)
-
 # Perform inference
+image_array = pre_process_image(image)
 input_name = session.get_inputs()[0].name
 outputs = session.run(None, {input_name: image_array})
 
-
-
-print("")
 # Get predicted class index
 predicted_class = outputs[0].argmax()
 print(f"Predicted class index: {predicted_class}")
-
-
-# Load ImageNet class labels
-with open(RESNET_LABELS_JSON, "r") as fs:
-    imagenet_classes = json.load(fs)
-
 
 # Print class name
 class_name = imagenet_classes[predicted_class]
