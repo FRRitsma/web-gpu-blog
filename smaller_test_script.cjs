@@ -5,14 +5,15 @@ const fs = require('fs');
 const util = require('util');
 const ort = require('onnxruntime-node');
 const path = require('path');
-const imagePath = path.join(__dirname, 'test-image-3.jpg');
+const imagePath = path.join(__dirname, 'test-image-2.jpg');
 const labelsPath = path.join(__dirname, "resnet_labels.json")
 
 const sharp = require('sharp');
+const {Tensor} = require("onnxruntime-web");
 
 // following code also works for onnxruntime-web.
 const InferenceSession = ort.InferenceSession;
-
+const targetSize = 224;
 
 //
 function loadLabels(labelsPath) {
@@ -20,51 +21,56 @@ function loadLabels(labelsPath) {
     return JSON.parse(labelsData); // Parse and return the labels as an array
 }
 
-// Function to preprocess the image
-async function preprocessImage(imagePath, targetSize) {
-    // Load and resize the image to the target dimensions
-    const image = await sharp(imagePath)
+async function extract_image(imagePath) {
+    // Step 1: Load and resize the image to the target dimensions
+    return await sharp(imagePath)
         .resize(targetSize, targetSize)
         .raw()
         .toBuffer();
+}
 
-    // Normalize the pixel values to [0, 1] and convert to Float32Array
-    let floatImage = Float32Array.from(image, (pixel) => pixel / 255.0);
+// Function to preprocess the image
+function preprocessImage(imageBuffer) {
 
-    // Step 4: Normalize using mean and std for each channel
+    const floatImage = Float32Array.from(imageBuffer, (pixel) => pixel / 255.0);
+
+    // Normalize channels:
     const mean = [0.485, 0.456, 0.406];
     const std = [0.229, 0.224, 0.225];
     const normalizedImage = new Float32Array(floatImage.length);
-
-    // Rearrange data to [C, H, W]
-    const numChannels = 3;
     for (let i = 0; i < floatImage.length; i++) {
-        const channel = i % numChannels;
-        floatImage[i] = (floatImage[i] - mean[channel]) / std[channel];
+        const channel = i % 3; // Assuming RGB with 3 channels
+        normalizedImage[i] = (floatImage[i] - mean[channel]) / std[channel];
     }
 
-    // Save the floatImage as an image
-    const scaledImage = Uint8Array.from(floatImage.map((pixel) => Math.round(pixel * 255))); // Scale back to 0-255
-    await sharp(Buffer.from(scaledImage), {
-        raw: {
-            width: targetSize,
-            height: targetSize,
-            channels: 3, // Assuming RGB
-        },
-    })
-        .toFile('output-image.png'); // Save as PNG
-    console.log('Saved floatImage as output-image.png');
+    //Rearrange dimensions to [C, H, W] from [H, W, C]
+    const channels = 3;
+    const height = targetSize;
+    const width = targetSize;
+    const transposedImage = new Float32Array(normalizedImage.length);
 
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            for (let c = 0; c < channels; c++) {
+                transposedImage[c * height * width + y * width + x] =
+                    normalizedImage[(y * width + x) * channels + c];
+            }
+        }
+    }
 
-    // Create a tensor with shape [1, 3, targetSize, targetSize] (batch size = 1, 3 channels)
-    const tensor = new ort.Tensor('float32', floatImage, [1, 3, targetSize, targetSize]);
+    // Add a batch dimension to create a tensor of shape [1, C, H, W]
+    const tensor = new Tensor('float32', transposedImage, [1, 3, height, width]);
+
     return tensor;
 }
 
+
 async function getPrediction(session, imagePath, labelsPath) {
     try {
+        const imageBuffer = await extract_image(imagePath);
+
         // Preprocess the image
-        const inputTensor = await preprocessImage(imagePath, 224);
+        const inputTensor = preprocessImage(imageBuffer);
 
         // Get the model's input name
         const inputName = session.inputNames[0];
@@ -96,78 +102,14 @@ async function getPrediction(session, imagePath, labelsPath) {
 // use an async context to call onnxruntime functions.
 async function main() {
 
-    // let tensor =
-    // console.log(tensor);
-
     try {
-        // create session option object
-        const options = createMySessionOptions();
-
-        //
-        // create inference session from a ONNX model file path or URL
-        //
         const session01 = await InferenceSession.create('./onnx_model/resnet.onnx');
-        const session01_B = await InferenceSession.create('./onnx_model/resnet.onnx', options); // specify options
-
-        //
-        // create inference session from an Node.js Buffer (Uint8Array)
-        //
-        const buffer02 = await readMyModelDataFile('./onnx_model/resnet.onnx'); // buffer is Uint8Array
-        const session02 = await InferenceSession.create(buffer02);
-        const session02_B = await InferenceSession.create(buffer02, options); // specify options
-
-        //
-        // create inference session from an ArrayBuffer
-        //
-        const arrayBuffer03 = buffer02.buffer;
-        const offset03 = buffer02.byteOffset;
-        const length03 = buffer02.byteLength;
-        const session03 = await InferenceSession.create(arrayBuffer03, offset03, length03);
-        const session03_B = await InferenceSession.create(arrayBuffer03, offset03, length03, options); // specify options
-
-        // example for browser
-        //const arrayBuffer03_C = await fetchMyModel('./model.onnx');
-        //const session03_C = await InferenceSession.create(arrayBuffer03_C);
-
-
-        // const inputTensor = await preprocessImage(imagePath, 224);
-        // const inputName = session01.inputNames[0]; // Most models have a single input
-        // const results = await session01.run({ [inputName]: inputTensor });
         const results = await getPrediction(session01, imagePath, labelsPath);
         console.log(results);
-
     } catch (e) {
         console.error(`failed to create inference session: ${e}`);
     }
-
-
     console.log("Completion")
 }
 
 main();
-
-function createMySessionOptions() {
-    // session options: please refer to the other example for details usage for session options
-
-    // example of a session option object in node.js:
-    // specify intra operator threads number to 1 and disable CPU memory arena
-    return { intraOpNumThreads: 1, enableCpuMemArena: false }
-
-    // example of a session option object in browser:
-    // specify WebAssembly exection provider
-    //return { executionProviders: ['wasm'] };
-
-}
-
-async function readMyModelDataFile(filepathOrUri) {
-    // read model file content (Node.js) as Buffer (Uint8Array)
-    return await util.promisify(fs.readFile)(filepathOrUri);
-}
-
-async function fetchMyModel(filepathOrUri) {
-    // use fetch to read model file (browser) as ArrayBuffer
-    if (typeof fetch !== 'undefined') {
-        const response = await fetch(filepathOrUri);
-        return await response.arrayBuffer();
-    }
-}
