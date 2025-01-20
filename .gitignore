@@ -10,3 +10,5 @@ wheels/
 .venv
 /onnx_model/resnet.onnx
 /node_modules/
+/.ruff_cache/
+/.mypy_cache/
