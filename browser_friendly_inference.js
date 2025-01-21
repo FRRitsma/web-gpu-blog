@@ -1,5 +1,4 @@
 const InferenceSession = ort.InferenceSession;
-const Tensor = ort.Tensor;
 
 // Constants
 const modelUrl = './onnx_model/resnet.onnx';
@@ -88,7 +87,7 @@ async function resizeImage(imageFile) {
   const height = targetSize;
 
   const imageData = ctx.getImageData(x, y, width, height).data;
-  // Convert RGBA to RGB
+  // Convert RGBA to RGB (A/Alpha is the transparency of the pixel, and is not needed)
   const rgbData = [];
   for (let i = 0; i < imageData.length; i += 4) {
     rgbData.push(imageData[i]);     // Red

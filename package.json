@@ -1,0 +1,5 @@
+{
+  "devDependencies": {
+    "eslint-plugin-node": "^11.1.0"
+  }
+}
