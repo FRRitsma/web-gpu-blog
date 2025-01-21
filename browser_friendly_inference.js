@@ -33,7 +33,6 @@ function preprocessImage(imageData) {
     const floatImage = Float32Array.from(imageData, (pixel) => pixel / 255.0);
     console.assert(floatImage.length === targetSize*targetSize*3, "floatImage leads to an invalid buffer size");
 
-
     // Normalize channels (RGB)
     const normalizedImage = new Float32Array(floatImage.length);
     for (let i = 0; i < floatImage.length; i++) {
@@ -43,8 +42,8 @@ function preprocessImage(imageData) {
 
     // Rearrange dimensions from [H, W, C] to [C, H, W]
     const channels = 3;
-    const height = 224;
-    const width = 224;
+    const height = targetSize;
+    const width = targetSize;
     const transposedImage = new Float32Array(normalizedImage.length);
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
@@ -54,8 +53,6 @@ function preprocessImage(imageData) {
             }
         }
     }
-
-    // Create a tensor with shape [1, 3, 224, 224]
     return new ort.Tensor('float32', transposedImage, [1, 3, height, width]);
 }
 
@@ -99,7 +96,7 @@ async function resizeImage(imageFile) {
     rgbData.push(imageData[i + 2]); // Blue
   }
   // Log the length of the RGB data array
-  console.log("RGB data length:", rgbData.length);
+  console.assert(rgbData.length === targetSize*targetSize*3, "Extracted image leads to an invalid buffer size");
   return rgbData;
 }
 
