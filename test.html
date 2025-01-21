@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ONNX Inference</title>
+  <!-- Include ONNXRuntime Web from a CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
+</head>
+<body>
+  <h1>Image Classification with ONNX</h1>
+
+  <label for="imageInput">Upload an image:</label>
+  <input type="file" id="imageInput" accept="image/*"><br><br>
+
+  <button id="runInference" disabled>Run Inference</button>
+
+  <h2>Results</h2>
+  <div id="results">
+    <p>No results yet.</p>
+  </div>
+
+  <script src="browser_friendly_inference.js"></script>
+</body>
+</html>

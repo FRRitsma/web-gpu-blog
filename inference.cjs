@@ -23,10 +23,12 @@ function loadLabels(labelsPath) {
 }
 
 async function extract_image(imagePath) {
-    return await sharp(imagePath)
+    let image_buffer = await sharp(imagePath)
         .resize(targetSize, targetSize)
         .raw()
         .toBuffer();
+    console.assert(image_buffer.length === targetSize*targetSize*3, "Extracted image leads to an invalid buffer size");
+    return image_buffer;
 }
 
 // Function to preprocess the image
