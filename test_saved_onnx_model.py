@@ -6,13 +6,13 @@ import onnxruntime as ort
 from PIL import Image
 import numpy as np
 from save_resnet_as_onnx import onnx_file_path
-from settings import RESNET_LABELS_JSON
+from settings import RESNET_LABELS_JSON_PATH
 
 # Start inference session:
 session = ort.InferenceSession(onnx_file_path)
 
 # Load Class Labels:
-with open(RESNET_LABELS_JSON, "r") as fs:
+with open(RESNET_LABELS_JSON_PATH, "r") as fs:
     imagenet_classes = json.load(fs)
 
 # Load image:

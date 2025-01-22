@@ -1,4 +1,5 @@
 from pathlib import Path
 
-
-RESNET_LABELS_JSON = Path(__file__).parent / "resnet_labels.json"
+DIRECTORY_ROOT_PATH = Path(__file__).parent
+RESNET_LABELS_JSON_PATH = DIRECTORY_ROOT_PATH / "resnet_labels.json"
+ONNX_MODEL_PATH = DIRECTORY_ROOT_PATH / "onnx_model" / "resnet.onnx"
