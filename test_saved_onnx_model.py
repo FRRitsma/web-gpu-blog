@@ -16,8 +16,8 @@ with open(RESNET_LABELS_JSON_PATH, "r") as fs:
     imagenet_classes = json.load(fs)
 
 # Load image:
-image_path: Path = Path(__file__).parent / "test-image-3.jpg"
-image: Image = Image.open(image_path).convert("RGB")
+TEST_IMAGE_PATH: Path = Path(__file__).parent / "test-image-3.jpg"
+image: Image = Image.open(TEST_IMAGE_PATH).convert("RGB")
 
 
 def pre_process_image(image: Image) -> np.float32:
