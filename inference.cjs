@@ -23,7 +23,7 @@ function loadLabels(labelsPath) {
 }
 
 async function extract_image(imagePath) {
-    let image_buffer = await sharp(imagePath)
+    const image_buffer = await sharp(imagePath)
         .resize(targetSize, targetSize)
         .raw()
         .toBuffer();

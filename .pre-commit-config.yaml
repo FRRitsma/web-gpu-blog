@@ -27,13 +27,12 @@ repos:
         types: [python]
         args: [--min-confidence, "70"]
 
-  # New ESLint hook for JavaScript linting
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: ''  # You can check for the latest version
+    rev: ''
     hooks:
       - id: eslint
         name: eslint
         language: node
         files: \.(js|cjs)$
-        exclude: ^node_modules/
+        exclude: ^(node_modules/|eslint.config.js$)
         args: ['--fix']
