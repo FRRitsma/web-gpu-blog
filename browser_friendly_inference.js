@@ -2,7 +2,7 @@ const InferenceSession = ort.InferenceSession;
 
 // Constants
 const modelUrl = 'http://127.0.0.1:8000/model';
-const labelsUrl = './resnet_labels.json';
+const labelsUrl = 'http://127.0.0.1:8000/labels';
 const targetSize = 224;
 const mean = [0.485, 0.456, 0.406];
 const std = [0.229, 0.224, 0.225];
@@ -104,7 +104,6 @@ async function runInference(imageFile) {
   try {
     const imageData = await resizeImage(imageFile);
     const inputTensor = preprocessImage(imageData);
-    console.log('Tensor shape:', inputTensor.dims); // Should log [1, 3, 224, 224]
     const inputName = session.inputNames[0];
     const results = await session.run({ [inputName]: inputTensor });
     const outputName = session.outputNames[0];
