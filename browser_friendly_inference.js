@@ -10,12 +10,11 @@ const std = [0.229, 0.224, 0.225];
 let session;
 
 async function loadModel() {
-    session = await InferenceSession.create(modelUrl);
-    if (!session) {
-        throw new Error('Failed to initialize sesion')
-    }
-    console.log("ONNX model loaded.")
-    document.getElementById('runInference').disabled = false; // Enable button
+  session = await InferenceSession.create(modelUrl);
+  if (!session) {
+    throw new Error('Failed to initialize sesion');
+  }
+  document.getElementById('runInference').disabled = false; // Enable button
 }
 
 async function loadLabels() {
@@ -24,31 +23,31 @@ async function loadLabels() {
 }
 
 function preprocessImage(imageData) {
-    // Convert image data to Float32 and normalize
-    const floatImage = Float32Array.from(imageData, (pixel) => pixel / 255.0);
-    console.assert(floatImage.length === targetSize*targetSize*3, "floatImage leads to an invalid buffer size");
+  // Convert image data to Float32 and normalize
+  const floatImage = Float32Array.from(imageData, (pixel) => pixel / 255.0);
+  console.assert(floatImage.length === targetSize*targetSize*3, 'floatImage leads to an invalid buffer size');
 
-    // Normalize channels (RGB)
-    const normalizedImage = new Float32Array(floatImage.length);
-    for (let i = 0; i < floatImage.length; i++) {
-        const channel = i % 3; // R, G, B channels
-        normalizedImage[i] = (floatImage[i] - mean[channel]) / std[channel];
-    }
+  // Normalize channels (RGB)
+  const normalizedImage = new Float32Array(floatImage.length);
+  for (let i = 0; i < floatImage.length; i++) {
+    const channel = i % 3; // R, G, B channels
+    normalizedImage[i] = (floatImage[i] - mean[channel]) / std[channel];
+  }
 
-    // Rearrange dimensions from [H, W, C] to [C, H, W]
-    const channels = 3;
-    const height = targetSize;
-    const width = targetSize;
-    const transposedImage = new Float32Array(normalizedImage.length);
-    for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-            for (let c = 0; c < channels; c++) {
-                transposedImage[c * height * width + y * width + x] =
+  // Rearrange dimensions from [H, W, C] to [C, H, W]
+  const channels = 3;
+  const height = targetSize;
+  const width = targetSize;
+  const transposedImage = new Float32Array(normalizedImage.length);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      for (let c = 0; c < channels; c++) {
+        transposedImage[c * height * width + y * width + x] =
                     normalizedImage[(y * width + x) * channels + c];
-            }
-        }
+      }
     }
-    return new ort.Tensor('float32', transposedImage, [1, 3, height, width]);
+  }
+  return new ort.Tensor('float32', transposedImage, [1, 3, height, width]);
 }
 
 async function resizeImage(imageFile) {
@@ -58,13 +57,13 @@ async function resizeImage(imageFile) {
 
   // Validate that canvas context is available
   if (!ctx) {
-    throw new Error("Failed to get 2D context from canvas.");
+    throw new Error('Failed to get 2D context from canvas.');
   }
 
   // Load the image
   const imageLoaded = new Promise((resolve, reject) => {
     img.onload = resolve;
-    img.onerror = () => reject(new Error("Failed to load the image."));
+    img.onerror = () => reject(new Error('Failed to load the image.'));
   });
 
   img.src = URL.createObjectURL(imageFile);
@@ -90,7 +89,7 @@ async function resizeImage(imageFile) {
     rgbData.push(imageData[i + 2]); // Blue
   }
   // Log the length of the RGB data array
-  console.assert(rgbData.length === targetSize*targetSize*3, "Extracted image leads to an invalid buffer size");
+  console.assert(rgbData.length === targetSize*targetSize*3, 'Extracted image leads to an invalid buffer size');
   return rgbData;
 }
 
