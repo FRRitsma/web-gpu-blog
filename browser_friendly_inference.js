@@ -9,7 +9,6 @@ const std = [0.229, 0.224, 0.225];
 
 let session;
 
-// Load ONNX model
 async function loadModel() {
     session = await InferenceSession.create(modelUrl);
     if (!session) {
@@ -19,13 +18,11 @@ async function loadModel() {
     document.getElementById('runInference').disabled = false; // Enable button
 }
 
-// Load labels
 async function loadLabels() {
   const response = await fetch(labelsUrl);
   return await response.json();
 }
 
-// Resize and preprocess the image
 function preprocessImage(imageData) {
     // Convert image data to Float32 and normalize
     const floatImage = Float32Array.from(imageData, (pixel) => pixel / 255.0);
@@ -54,7 +51,6 @@ function preprocessImage(imageData) {
     return new ort.Tensor('float32', transposedImage, [1, 3, height, width]);
 }
 
-// Resize image using canvas
 async function resizeImage(imageFile) {
   const img = new Image();
   const canvas = document.createElement('canvas');
@@ -99,7 +95,6 @@ async function resizeImage(imageFile) {
 }
 
 
-// Run inference and display results
 async function runInference(imageFile) {
   try {
     const imageData = await resizeImage(imageFile);
