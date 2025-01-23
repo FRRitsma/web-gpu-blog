@@ -13,11 +13,6 @@
   <label for="imageInput">Upload an image:</label>
   <input type="file" id="imageInput" accept="image/*"><br><br>
 
-  <!-- Display the uploaded image -->
-  <div id="imagePreview">
-    <p>No image selected.</p>
-  </div>
-
   <button id="runInference" disabled>Run Inference</button>
 
   <h2>Results</h2>
@@ -25,29 +20,6 @@
     <p>No results yet.</p>
   </div>
 
-  <script>
-    const imageInput = document.getElementById('imageInput');
-    const imagePreview = document.getElementById('imagePreview');
-    const runInferenceButton = document.getElementById('runInference');
-
-    imageInput.addEventListener('change', (event) => {
-      const file = event.target.files[0];
-
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          // Display the image
-          imagePreview.innerHTML = `<img src="${e.target.result}" alt="Uploaded Image" style="max-width: 100%; max-height: 300px;">`;
-          // Enable the inference button
-          runInferenceButton.disabled = false;
-        };
-        reader.readAsDataURL(file);
-      } else {
-        imagePreview.innerHTML = '<p>No image selected.</p>';
-        runInferenceButton.disabled = true;
-      }
-    });
-  </script>
-  <script type="module" src="browser_friendly_inference.js"></script>
+  <script src="browser_friendly_inference.js"></script>
 </body>
 </html>
