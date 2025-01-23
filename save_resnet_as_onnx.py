@@ -4,10 +4,7 @@ import torch
 from torchvision import models, transforms
 from PIL import Image
 
-from settings import RESNET_IMAGE_SIZE
-from test_saved_onnx_model import TEST_IMAGE_PATH
-
-onnx_file_path: Path = Path(__file__).parent / "onnx_model" / "resnet.onnx"
+from settings import RESNET_IMAGE_SIZE, ONNX_MODEL_PATH, TEST_IMAGE_PATH
 
 if __name__ == "__main__":
     # Load a pre-trained ResNet-18 model
@@ -31,7 +28,7 @@ if __name__ == "__main__":
     torch.onnx.export(
         model,
         dummy_input,
-        onnx_file_path,
+        ONNX_MODEL_PATH,
         export_params=True,
         opset_version=11,
         do_constant_folding=True,

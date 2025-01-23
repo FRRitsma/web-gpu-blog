@@ -1,7 +1,7 @@
 const InferenceSession = ort.InferenceSession;
 
 // Constants
-const modelUrl = './onnx_model/resnet.onnx';
+const modelUrl = 'http://127.0.0.1:8000/model';
 const labelsUrl = './resnet_labels.json';
 const targetSize = 224;
 const mean = [0.485, 0.456, 0.406];
@@ -11,13 +11,12 @@ let session;
 
 // Load ONNX model
 async function loadModel() {
-  try {
     session = await InferenceSession.create(modelUrl);
-    console.log('ONNX model loaded.');
+    if (!session) {
+        throw new Error('Failed to initialize sesion')
+    }
+    console.log("ONNX model loaded.")
     document.getElementById('runInference').disabled = false; // Enable button
-  } catch (error) {
-    console.error('Failed to load ONNX model:', error);
-  }
 }
 
 // Load labels
