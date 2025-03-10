@@ -14,7 +14,7 @@ Running the app:
 (After model has been downloaded and converted to .onnx file)
 
 1. Activate virtual environment
-2. Run `uvicorn main:app` to start the fastapi
+2. Run `uvicorn main:app` to serve fastapi
 3. Run `test.html`, this should open your default browser
 4. Click "Choose File" and open an image file. Images are included in test_images
 5. Click "Run Inference" and await the results
